@@ -1,25 +1,62 @@
+import React, { useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Form from './components/Form';
+import TeamMember from './components/TeamMember';
+import axios from './axios';
 
-function App() {
+const initialFormValues = {
+  name: '',
+  email: '',
+  role: '',
+}
+
+
+
+export default function App() {
+  
+  const [teamMembers, setTeamMembers] = useState([]);
+  
+  const [formValues, setFormValues] = useState(initialFormValues);
+  
+  const updateForm = (inputName, inputValue) => {
+    setFormValues({
+      ...formValues, 
+      [inputName]: inputValue
+    })
+  }
+
+  const submitForm = () => {
+    const newFriend = {
+      name: formValues.name.trim(),
+      email: formValues.email.trim(),
+      role: formValues.role,
+    }
+    if (!newFriend.name || !newFriend.email || !newFriend.role){
+      return;
+    }
+    axios.post('fakeapi.com', newFriend)
+      .then((res) => {
+        console.log(res);
+        setTeamMembers([...teamMembers, res.data])
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      setFormValues(initialFormValues);
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container">
+      <h1>Team Member Form</h1>
+      <Form 
+        values={formValues}
+        update={updateForm}
+        submit={submitForm}
+      />
+      {teamMembers.map((tm) => {
+        return <TeamMember key={tm.id} details={tm}/>
+      })}
     </div>
   );
 }
-
-export default App;
